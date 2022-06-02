@@ -1,0 +1,101 @@
+{
+	"name": "opensr-file-cloning",
+	"displayName": "OpenSR File Cloning",
+	"description": "A Star Ruler 2 modding tool designed to correctly clone game files which may have been overridden by one or more mods.",
+	"version": "0.1.0",
+	"publisher": "open-star-ruler",
+	"license": "MIT",
+	"engines": {
+		"vscode": "^1.67.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"workspaceContains:**/modinfo.txt",
+		"onCommand:opensr-file-cloning.findBaseFiles",
+		"onCommand:opensr-file-cloning.registerMod",
+		"onCommand:opensr-file-cloning.cloneBaseFile",
+		"onCommand:opensr-file-cloning.cloneModFile"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "opensr-file-cloning.findBaseFiles",
+				"title": "OpenSR File Cloning: Find Base Files"
+			},
+			{
+				"command": "opensr-file-cloning.registerMod",
+				"title": "OpenSR File Cloning: Register Mod"
+			},
+			{
+				"command": "opensr-file-cloning.cloneBaseFile",
+				"title": "OpenSR File Cloning: Clone Base File"
+			},
+			{
+				"command": "opensr-file-cloning.cloneModFile",
+				"title": "OpenSR File Cloning: Clone Mod File"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "OpenSR File Cloning",
+			"properties": {
+				"opensr-file-cloning.baseGameFolder": {
+					"type": "string",
+					"default": "",
+					"description": "Path to Star Ruler 2 installation folder.",
+					"title": "Base Game Folder"
+				},
+				"opensr-file-cloning.registeredMods": {
+					"type": "object",
+					"default": {},
+					"title": "Registered Mods",
+					"description": "A mapping of mod names to their respective folders."
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "yarn run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "yarn run compile && yarn run lint",
+		"lint": "eslint src --ext ts",
+		"lint:fix": "eslint src --ext ts --fix",
+		"test": "node ./out/test/runTest.js",
+		"vscode:pack": "vsce package",
+		"precommit": "lint-staged --concurrent false"
+	},
+	"lint-staged": {
+		"*.{js,ts}": [
+			"eslint --fix"
+		],
+		"*.{js,ts,md,json,yml,yaml}": [
+			"prettier --write"
+		]
+	},
+	"devDependencies": {
+		"@types/glob": "^7.2.0",
+		"@types/mocha": "^9.1.1",
+		"@types/node": "14.x",
+		"@types/vscode": "^1.67.0",
+		"@typescript-eslint/eslint-plugin": "^5.21.0",
+		"@typescript-eslint/parser": "^5.21.0",
+		"@vscode/test-electron": "^2.1.3",
+		"eslint": "^8.14.0",
+		"eslint-plugin-jsdoc": "^39.3.2",
+		"eslint-plugin-no-null": "^1.0.2",
+		"eslint-plugin-prettier": "^4.0.0",
+		"eslint-plugin-simple-import-sort": "^7.0.0",
+		"glob": "^8.0.1",
+		"husky": "^8.0.1",
+		"lint-staged": "^13.0.0",
+		"mocha": "^9.2.2",
+		"prettier": "^2.6.2",
+		"typescript": "^4.6.4",
+		"vsce": "^2.9.1"
+	},
+	"dependencies": {}
+}

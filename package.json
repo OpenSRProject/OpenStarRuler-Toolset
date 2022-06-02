@@ -11,6 +11,7 @@
 	"categories": [
 		"Other"
 	],
+	"repository": {"type": "git", "url": "https://github.com/OpenSRProject/OpenStarRuler-FileCloner"},
 	"activationEvents": [
 		"workspaceContains:**/modinfo.txt",
 		"onCommand:opensr-file-cloning.findBaseFiles",

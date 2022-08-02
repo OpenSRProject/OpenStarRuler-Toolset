@@ -7,6 +7,9 @@ Performs a number of useful functions related to modding Star Ruler 2.
 * Cloning base game files
 * Cloning mod files (with fallback to base game)
 * Comparing files with the base game
+    - The diff is editable, like the "Working Copy" diffs provided by VSCode's Git support.
+    - Green was added by the currently open mod.
+    - Red was removed by (or never existed in) the currently open mod.
 * Comparing files with a mod (with fallback to base game)
 
 ## Requirements
@@ -23,10 +26,11 @@ N/A
 ## Known Issues
 
 * Doesn't handle inter-mod dependencies yet. If a mod doesn't explicitly contain a file, fallback is always to the base game.
-* Cross-mod comparison may cause your Source Control pane to detect and open Git repositories unrelated to your project.
+* Cross-repo comparisons may cause your Source Control pane to detect and open Git repositories unrelated to your project.
     - This is related to the `Git: Auto Repository Detection` (JSON: `git.autoRepositoryDetection`) setting. VSCode defaults this setting to `true`, which scans both subfolders of the current workspace and parent folders of currently opened files for Git repositories.
 
     Setting it to `false` or `subFolders` will resolve the problem.
+* Comparisons don't yet have graceful handling for cases where one or both files are nonexistent.
 
 ## Release Notes
 

@@ -1,8 +1,8 @@
 {
 	"name": "opensr-file-cloning",
-	"displayName": "OpenSR File Cloning",
-	"description": "A Star Ruler 2 modding tool designed to correctly clone game files which may have been overridden by one or more mods.",
-	"version": "0.1.0",
+	"displayName": "OpenSR Toolset",
+	"description": "Performs a number of useful functions related to modding Star Ruler 2.",
+	"version": "0.2.0",
 	"publisher": "open-star-ruler",
 	"license": "MIT",
 	"engines": {
@@ -17,31 +17,41 @@
 		"onCommand:opensr-file-cloning.findBaseFiles",
 		"onCommand:opensr-file-cloning.registerMod",
 		"onCommand:opensr-file-cloning.cloneBaseFile",
-		"onCommand:opensr-file-cloning.cloneModFile"
+		"onCommand:opensr-file-cloning.cloneModFile",
+		"onCommand:opensr-file-cloning.compareBaseFile",
+		"onCommand:opensr-file-cloning.compareModFile"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "opensr-file-cloning.findBaseFiles",
-				"title": "OpenSR File Cloning: Find Base Files"
+				"title": "OpenSR Toolset: Find Base Files"
 			},
 			{
 				"command": "opensr-file-cloning.registerMod",
-				"title": "OpenSR File Cloning: Register Mod"
+				"title": "OpenSR Toolset: Register Mod"
 			},
 			{
 				"command": "opensr-file-cloning.cloneBaseFile",
-				"title": "OpenSR File Cloning: Clone Base File"
+				"title": "OpenSR Toolset: Clone Base File"
 			},
 			{
 				"command": "opensr-file-cloning.cloneModFile",
-				"title": "OpenSR File Cloning: Clone Mod File"
+				"title": "OpenSR Toolset: Clone Mod File"
+			},
+			{
+				"command": "opensr-file-cloning.compareBaseFile",
+				"title": "OpenSR Toolset: Compare Base File"
+			},
+			{
+				"command": "opensr-file-cloning.compareModFile",
+				"title": "OpenSR Toolset: Compare Mod File"
 			}
 		],
 		"configuration": {
 			"type": "object",
-			"title": "OpenSR File Cloning",
+			"title": "OpenSR Toolset",
 			"properties": {
 				"opensr-file-cloning.baseGameFolder": {
 					"type": "string",

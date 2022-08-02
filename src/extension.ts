@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as paths from 'node:path';
 
 function includesAll<T>(array: Array<T>, ...vals: T[]): boolean {
 	return vals.every((val: T) => array.includes(val));
@@ -9,7 +9,7 @@ function includesAll<T>(array: Array<T>, ...vals: T[]): boolean {
 function findModinfos(currentDirPath: string): string[] {
 	let results: string[] = [];
     fs.readdirSync(currentDirPath).forEach(function (name) {
-        var filePath = path.join(currentDirPath.toString(), name);
+        var filePath = paths.join(currentDirPath.toString(), name);
         var stat = fs.statSync(filePath);
 		if (stat.isDirectory()) {
             results.push(...findModinfos(filePath));
@@ -18,6 +18,160 @@ function findModinfos(currentDirPath: string): string[] {
 		}
     });
 	return results;
+}
+
+async function getDestinationMod(): Promise<string | undefined> {
+	const modinfoPaths = findModinfos(vscode.workspace.workspaceFolders![0].uri.fsPath);
+	let modinfoPath: string | undefined = vscode.workspace.workspaceFolders![0].uri.fsPath;
+	if(modinfoPaths.length === 1) {
+		modinfoPath = modinfoPaths[0];
+	}
+	else if(modinfoPaths.length > 1) {
+		modinfoPath = await vscode.window.showQuickPick(modinfoPaths, { canPickMany: false, title: "Select Destination Mod" });
+	}
+	return modinfoPath;
+}
+
+async function getGamePath(purpose: string, isInternal?: boolean): Promise<string | null | undefined> {
+	const gamePath = vscode.workspace.getConfiguration().get("opensr-file-cloning.baseGameFolder") as string;
+	if(!gamePath) {
+		if(isInternal)
+			return null;
+		else {
+			await vscode.window.showErrorMessage(`Cannot ${purpose} from unknown location! Set your base game path first!`, { modal: true });
+			if(await vscode.commands.executeCommand("opensr-file-cloning.findBaseFiles"))
+				return getGamePath(purpose, isInternal);
+			return;
+		}
+	}
+	return gamePath;
+}
+
+async function findBaseFile(purpose: string, gamePath?: string | null, usePath?: string, isInternal?: boolean): Promise<string | null | undefined> {
+	if(!gamePath)
+		return isInternal ? null : undefined;
+	let path: string | undefined;
+	if(!isInternal) {
+			path = await vscode.window.showInputBox({
+			title: "File Path", 
+			prompt: `Input the path to the file to ${purpose}, e.g. "data/objects.txt"`,
+			value: usePath,
+		});
+	} else {
+		path = usePath;
+	}
+	if(!path)
+		{return;}
+	if(path.startsWith("/") || path.startsWith("\\"))
+		{path = path.substring(1);}
+	const resolvedPath = `${gamePath}/${path}`;
+	if(!fs.existsSync(resolvedPath)) {
+		if(isInternal) {
+			return null;
+		} else {
+			await vscode.window.showErrorMessage("The specified file does not exist! Are you sure you specified the right path?", { modal: true });
+			return await findBaseFile(purpose, gamePath, usePath, isInternal);
+		}
+	}
+	return path;
+}
+
+async function pickMod(purpose: string): Promise<string | undefined> {
+	const registeredMods = vscode.workspace.getConfiguration().get("opensr-file-cloning.registeredMods") as object;
+	if(!registeredMods) {
+		await vscode.window.showErrorMessage(`Must have a mod to ${purpose} from!`, { modal: true });
+		if(await vscode.commands.executeCommand("opensr-file-cloning.registerMod"))
+			return await pickMod(purpose);
+		return;
+	}
+	
+	let mod: string | undefined;
+	if(Object.keys(registeredMods).length === 1) {
+		mod = Object.keys(registeredMods)[0];
+	} else {
+		mod = await vscode.window.showQuickPick(Object.keys(registeredMods), { canPickMany: false, title: "Select Source Mod" });
+		if(!mod)
+			{return;}
+	}
+	return registeredMods[mod];
+}
+
+async function findModFile(purpose: string, modPath: string, usePath?: string): Promise<string | undefined> {
+	let path = await vscode.window.showInputBox({
+		title: "File Path", 
+		prompt: `Input the path to the file to ${purpose}, e.g. "data/objects.txt"`,
+		value: usePath,
+	});
+	if(!path)
+		{return;}
+	if(path.startsWith("/") || path.startsWith("\\"))
+		{path = path.substring(1);}
+	const resolvedPath = `${modPath}/${path}`;
+	if(!fs.existsSync(resolvedPath)) {
+		const gamePath = await getGamePath(purpose, true);
+		const resolvedGamePath = await findBaseFile(purpose, gamePath, path, true);
+		if(!resolvedGamePath) {
+			await vscode.window.showErrorMessage("The specified file does not exist! Are you sure you specified the right path?", { modal: true });
+			return await findModFile(purpose, modPath, usePath);
+		}
+		return resolvedGamePath;
+	}
+	return path;
+}
+
+type FileOperation = (pathToSource: string, destination: string) => Promise<void>;
+
+async function cloneFile(pathToSource: string, destination: string) {
+	const modinfoPath = getDestinationMod();
+	if(!modinfoPath)
+		return;
+	try {
+		fs.copyFileSync(pathToSource, `${modinfoPath}/${destination}`, fs.constants.COPYFILE_EXCL);
+	} catch {
+		const tryAgain = (await vscode.window.showWarningMessage(
+			`The destination file already exists. Overwrite?`,
+			{ modal: true },
+			"Yes", "No"
+		)) === "Yes";
+		if(tryAgain) {
+			fs.copyFileSync(pathToSource, `${modinfoPath}/${destination}`);
+		}
+	}
+}
+
+async function diffFile(pathToSource: string, destination: string) {
+	const modinfoPath = await getDestinationMod();
+	if(!modinfoPath)
+		return;
+	vscode.commands.executeCommand(
+		"vscode.diff", 
+		vscode.Uri.file(pathToSource), 
+		vscode.Uri.file(`${modinfoPath}/${destination}`),
+		destination, 
+		{preview: true}
+	);
+}
+
+function buildBaseFileOperation(purpose: string, operation: FileOperation): () => Promise<void> {
+	return async () => {
+		const gamePath = await getGamePath(purpose);
+		const path = await findBaseFile(purpose, gamePath);
+		if(!path)
+			return;
+		operation(`${gamePath}/${path}`, path);
+	}
+}
+
+function buildModFileOperation(purpose: string, operation: FileOperation): () => Promise<void> {
+	return async () => {
+		const mod = await pickMod(purpose);
+		if(!mod)
+			return;
+		const path = await findModFile(purpose, mod);
+		if(!path)
+			return;
+		operation(`${mod}/${path}`, path);
+	}
 }
 
 export function activate(context: vscode.ExtensionContext) {	
@@ -30,6 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const isValidInstall = includesAll(gameFolder, "data", "locales", "mods", "scripts", "maps");
 		if(isValidInstall) {
 			await vscode.workspace.getConfiguration().update("opensr-file-cloning.baseGameFolder", gameUri.fsPath, true);
+			return true;
 		} else {
 			await vscode.window.showErrorMessage(
 				`Not a valid SR2 installation! Locate the folder containing the "data", "locales", "mods", "maps" and "scripts" folders!`,
@@ -57,130 +212,27 @@ export function activate(context: vscode.ExtensionContext) {
 				config = {[name]: modUri.fsPath};
 			}
 			await vscode.workspace.getConfiguration().update("opensr-file-cloning.registeredMods", config, true);
+			return true;
 		} else {
 			await vscode.window.showErrorMessage(`Not a valid SR2 mod! Locate a folder containing a "modinfo.txt" file!`, { modal: true });
 			vscode.commands.executeCommand("opensr-file-cloning.registerMod");
 		}
 	});
 
-	const cloneBaseFile = vscode.commands.registerCommand("opensr-file-cloning.cloneBaseFile", async (usePath?: string, isInternal?: boolean) => {
-		const gamePath = vscode.workspace.getConfiguration().get("opensr-file-cloning.baseGameFolder");
-		if(!gamePath && !isInternal) {
-			await vscode.window.showErrorMessage("Cannot clone from unknown location! Set your base game path first!", { modal: true });
-			vscode.commands.executeCommand("opensr-file-cloning.findBaseFiles");
-		} else {
-			let path: string | undefined;
-			if(!isInternal) {
-					path = await vscode.window.showInputBox({
-					title: "File Path", 
-					prompt: `Input the path to the file to clone, e.g. "data/objects.txt"`,
-					value: usePath,
-				});
-			} else {
-				path = usePath;
-			}
-			if(!path)
-				{return;}
-			if(path.startsWith("/") || path.startsWith("\\"))
-				{path = path.substring(1);}
-			const resolvedPath = `${gamePath}/${path}`;
-			if(!fs.existsSync(resolvedPath)) {
-				if(isInternal) {
-					return false;
-				} else {
-					await vscode.window.showErrorMessage("The specified file does not exist! Are you sure you specified the right path?", { modal: true });
-					vscode.commands.executeCommand("opensr-file-cloning.cloneBaseFile", path);
-				}
-			} else {
-				const modinfoPaths = findModinfos(vscode.workspace.workspaceFolders![0].uri.fsPath);
-				let modinfoPath: string | undefined = vscode.workspace.workspaceFolders![0].uri.fsPath;
-				if(modinfoPaths.length === 1) {
-					modinfoPath = modinfoPaths[0];
-				}
-				else if(modinfoPaths.length > 1) {
-					modinfoPath = await vscode.window.showQuickPick(modinfoPaths, { canPickMany: false, title: "Select Destination Mod" });
-					if(!modinfoPath)
-						{return true;}
-				}
-				try {
-					fs.copyFileSync(resolvedPath, `${modinfoPath}/${path}`, fs.constants.COPYFILE_EXCL);
-				} catch {
-					const tryAgain = (await vscode.window.showWarningMessage(
-						`The destination file already exists. Overwrite?`,
-						{ modal: true },
-						"Yes", "No"
-					)) === "Yes";
-					if(tryAgain) {
-						fs.copyFileSync(resolvedPath, `${modinfoPath}/${path}`);
-					}
-				}
-				return true;
-			}
-		}
-	});
+	const cloneBaseFile = vscode.commands.registerCommand("opensr-file-cloning.cloneBaseFile", buildBaseFileOperation("clone", cloneFile));
 
-	const cloneModFile = vscode.commands.registerCommand("opensr-file-cloning.cloneModFile", async (usePath?: string) => {
-		const registeredMods = vscode.workspace.getConfiguration().get("opensr-file-cloning.registeredMods") as object;
-		if(!registeredMods) {
-			await vscode.window.showErrorMessage("Must have a mod to clone from!", { modal: true });
-			vscode.commands.executeCommand("opensr-file-cloning.registerMod");
-		} else {
-			let mod: string | undefined;
-			if(Object.keys(registeredMods).length === 1) {
-				mod = Object.keys(registeredMods)[0];
-			} else {
-				mod = await vscode.window.showQuickPick(Object.keys(registeredMods), { canPickMany: false, title: "Select Source Mod" });
-				if(!mod)
-					{return;}
-			}
-			const modPath = registeredMods[mod];
+	const cloneModFile = vscode.commands.registerCommand("opensr-file-cloning.cloneModFile", buildModFileOperation("clone", cloneFile));
 
-			let path = await vscode.window.showInputBox({
-				title: "File Path", 
-				prompt: `Input the path to the file to clone, e.g. "data/objects.txt"`,
-				value: usePath,
-			});
-			if(!path)
-				{return;}
-			if(path.startsWith("/") || path.startsWith("\\"))
-				{path = path.substring(1);}
-			const resolvedPath = `${modPath}/${path}`;
-			if(!fs.existsSync(resolvedPath)) {
-				if(!(await vscode.commands.executeCommand("opensr-file-cloning.cloneBaseFile", path, true))) {
-					await vscode.window.showErrorMessage("The specified file does not exist! Are you sure you specified the right path?", { modal: true });
-					vscode.commands.executeCommand("opensr-file-cloning.cloneModFile", path);
-				}
-			} else {
-				const modinfoPaths = findModinfos(vscode.workspace.workspaceFolders![0].uri.fsPath);
-				let modinfoPath: string | undefined = vscode.workspace.workspaceFolders![0].uri.fsPath;
-				if(modinfoPaths.length === 1) {
-					modinfoPath = modinfoPaths[0];
-				}
-				else if(modinfoPaths.length > 1) {
-					modinfoPath = await vscode.window.showQuickPick(modinfoPaths, { canPickMany: false, title: "Select Destination Mod" });
-					if(!modinfoPath)
-						{return;}
-				}
-				try {
-					fs.copyFileSync(resolvedPath, `${modinfoPath}/${path}`, fs.constants.COPYFILE_EXCL);
-				} catch {
-					const tryAgain = (await vscode.window.showWarningMessage(
-						`The destination file already exists. Overwrite?`,
-						{ modal: true },
-						"Yes", "No"
-					)) === "Yes";
-					if(tryAgain) {
-						fs.copyFileSync(resolvedPath, `${modinfoPath}/${path}`);
-					}
-				}
-			}
-		}
-	});
+	const compareBaseFile = vscode.commands.registerCommand("opensr-file-cloning.compareBaseFile", buildBaseFileOperation("compare", diffFile));
+
+	const compareModFile = vscode.commands.registerCommand("opensr-file-cloning.compareModFile", buildModFileOperation("compare", diffFile));
 
 	context.subscriptions.push(findBaseFiles);
 	context.subscriptions.push(registerMod);
 	context.subscriptions.push(cloneBaseFile);
 	context.subscriptions.push(cloneModFile);
+	context.subscriptions.push(compareBaseFile);
+	context.subscriptions.push(compareModFile);
 }
 
 export function deactivate() {}

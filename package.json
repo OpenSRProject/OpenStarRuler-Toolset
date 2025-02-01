@@ -2,24 +2,18 @@
 	"name": "opensr-file-cloning",
 	"displayName": "OpenSR Toolset",
 	"description": "Performs a number of useful functions related to modding Star Ruler 2.",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"publisher": "open-star-ruler",
 	"license": "MIT",
 	"engines": {
-		"vscode": "^1.67.0"
+		"vscode": "^1.75.0"
 	},
 	"categories": [
 		"Other"
 	],
 	"repository": {"type": "git", "url": "https://github.com/OpenSRProject/OpenStarRuler-FileCloner"},
 	"activationEvents": [
-		"workspaceContains:**/modinfo.txt",
-		"onCommand:opensr-file-cloning.findBaseFiles",
-		"onCommand:opensr-file-cloning.registerMod",
-		"onCommand:opensr-file-cloning.cloneBaseFile",
-		"onCommand:opensr-file-cloning.cloneModFile",
-		"onCommand:opensr-file-cloning.compareBaseFile",
-		"onCommand:opensr-file-cloning.compareModFile"
+		"workspaceContains:**/modinfo.txt"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -77,7 +71,8 @@
 		"lint:fix": "eslint src --ext ts --fix",
 		"test": "node ./out/test/runTest.js",
 		"vscode:pack": "vsce package",
-		"precommit": "lint-staged --concurrent false"
+		"precommit": "lint-staged --concurrent false",
+		"rebuild": "yarn compile && yarn vscode:pack"
 	},
 	"lint-staged": {
 		"*.{js,ts}": [
@@ -90,8 +85,8 @@
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
-		"@types/node": "14.x",
-		"@types/vscode": "^1.67.0",
+		"@types/node": "16.x",
+		"@types/vscode": "^1.75.0",
 		"@typescript-eslint/eslint-plugin": "^5.21.0",
 		"@typescript-eslint/parser": "^5.21.0",
 		"@vscode/test-electron": "^2.1.3",

@@ -32,16 +32,6 @@ N/A
     Setting it to `false` or `subFolders` will resolve the problem.
 * Comparisons don't yet have graceful handling for cases where one or both files are nonexistent.
 
-## Release Notes
-
-### 0.1.0
-
-First alpha build, only clones files.
-
-### 0.2.0
-
-Second alpha build. Extensive refactoring, and added the ability to compare files without cloning.
-
 ### For more information
 
 Visit the OpenSR Discord: https://discord.gg/sUJKJDc

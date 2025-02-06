@@ -1,73 +1,64 @@
 import { commands, window, ExtensionContext }  from 'vscode';
 import { readdir } from 'node:fs/promises';
-import { buildBaseFileOperation, buildModFileOperation } from './targetTypes';
-import { cloneFile, diffFile } from './operations';
-import { includesAll, updateConfig, getConfig, RegisteredModList } from './utils';
+import { buildAncestorFileOperation, buildBaseFileOperation, buildModFileOperation } from './targetTypes';
+import { cloneFile, diffFile, registerMod, reregisterMod } from './operations';
+import { includesAll, updateConfig } from './utils';
+import { COMMANDS, CONFIGS, LOGGER } from './types';
 
 const { executeCommand, registerCommand } = commands;
-const { showErrorMessage, showInputBox, showOpenDialog } = window;
+const { showErrorMessage, showOpenDialog } = window;
 
 export function activate(context: ExtensionContext) {	
-	const findBaseFiles = registerCommand('opensr-file-cloning.findBaseFiles', async () => {
+	const { subscriptions } = context;
+	const findBaseFiles = registerCommand(COMMANDS.FIND_BASE_FILES, async () => {
+		LOGGER.debug(`findBaseFiles: Command executed...`);
 		const uris = await showOpenDialog({ canSelectFolders: true, canSelectFiles: false, title: "Find SR2 Installation", openLabel: "Select Folder", canSelectMany: false });
 		if(!uris)
-			{return;};
-		const gameUri = uris[0];
-		const gameFolder = await readdir(gameUri.fsPath);
+			{
+				LOGGER.debug(`findBaseFiles: No folder selected, user must have canceled...`);
+				return;
+			};
+		const { fsPath: gamePath } = uris[0];
+		const gameFolder = await readdir(gamePath);
 		const isValidInstall = includesAll(gameFolder, "data", "locales", "mods", "scripts", "maps");
 		if(isValidInstall) {
-			updateConfig("opensr-file-cloning.baseGameFolder", gameUri.fsPath);
+			LOGGER.info(`findBaseFiles: SR2 detected, updating config ${CONFIGS.BASE_GAME_FOLDER} to "${gamePath}"...`);
+			updateConfig(CONFIGS.BASE_GAME_FOLDER, gamePath);
 			return true;
 		} else {
+			LOGGER.info(`findBaseFiles: Invalid SR2 folder, retrying...`);
 			await showErrorMessage(
 				`Not a valid SR2 installation! Locate the folder containing the "data", "locales", "mods", "maps" and "scripts" folders!`,
 				{modal: true}
 			);
-			executeCommand("opensr-file-cloning.findBaseFiles");
-			return;
+			return await executeCommand(COMMANDS.FIND_BASE_FILES);
 		}
 	});
 
-	const registerMod = registerCommand('opensr-file-cloning.registerMod', async () => {
-		const uris = await showOpenDialog({ canSelectFolders: true, canSelectFiles: false, title: "Find Mod Folder", openLabel: "Select Folder", canSelectMany: false });
-		if(!uris)
-			{return;}
-		const modUri = uris[0];
-		const modFolder = await readdir(modUri.fsPath);
-		const isValidMod = modFolder.includes("modinfo.txt");
-		if(isValidMod) {
-			const name = await showInputBox({title: "Input Mod Name", prompt: "Input a name under which to register the mod"});
-			if(!name)
-				{return;}
-			let config = getConfig("opensr-file-cloning.registeredMods") as RegisteredModList;
-			if(config) {
-				config[name] = modUri.fsPath;
-			} else {
-				config = {[name]: modUri.fsPath};
-			}
-			await updateConfig("opensr-file-cloning.registeredMods", config);
-			return true;
-		} else {
-			await showErrorMessage(`Not a valid SR2 mod! Locate a folder containing a "modinfo.txt" file!`, { modal: true });
-			executeCommand("opensr-file-cloning.registerMod");
-			return;
-		}
-	});
+	const reregisterModCommand = registerCommand(COMMANDS.REREGISTER_MOD, reregisterMod);
+	const registerModCommand = registerCommand(COMMANDS.REGISTER_MOD, registerMod);
 
-	const cloneBaseFile = registerCommand("opensr-file-cloning.cloneBaseFile", buildBaseFileOperation("clone", cloneFile));
+	const cloneBaseFile = registerCommand(COMMANDS.CLONE_BASE_FILE, buildBaseFileOperation("clone", cloneFile));
 
-	const cloneModFile = registerCommand("opensr-file-cloning.cloneModFile", buildModFileOperation("clone", cloneFile));
+	const cloneModFile = registerCommand(COMMANDS.CLONE_MOD_FILE, buildModFileOperation("clone", cloneFile));
 
-	const compareBaseFile = registerCommand("opensr-file-cloning.compareBaseFile", buildBaseFileOperation("compare", diffFile));
+	const cloneAncestorFile = registerCommand(COMMANDS.CLONE_ANCESTOR_FILE, buildAncestorFileOperation("clone", cloneFile));
 
-	const compareModFile = registerCommand("opensr-file-cloning.compareModFile", buildModFileOperation("compare", diffFile));
+	const compareBaseFile = registerCommand(COMMANDS.COMPARE_BASE_FILE, buildBaseFileOperation("compare", diffFile));
 
-	context.subscriptions.push(findBaseFiles);
-	context.subscriptions.push(registerMod);
-	context.subscriptions.push(cloneBaseFile);
-	context.subscriptions.push(cloneModFile);
-	context.subscriptions.push(compareBaseFile);
-	context.subscriptions.push(compareModFile);
+	const compareModFile = registerCommand(COMMANDS.COMPARE_MOD_FILE, buildModFileOperation("compare", diffFile));
+
+	const compareAncestorFile = registerCommand(COMMANDS.COMPARE_ANCESTOR_FILE, buildAncestorFileOperation("compare", diffFile));
+
+	subscriptions.push(findBaseFiles);
+	subscriptions.push(reregisterModCommand);
+	subscriptions.push(registerModCommand);
+	subscriptions.push(cloneBaseFile);
+	subscriptions.push(cloneModFile);
+	subscriptions.push(cloneAncestorFile);
+	subscriptions.push(compareBaseFile);
+	subscriptions.push(compareModFile);
+	subscriptions.push(compareAncestorFile);
 }
 
 export function deactivate() {}

@@ -2,7 +2,7 @@
 	"name": "opensr-file-cloning",
 	"displayName": "OpenSR Toolset",
 	"description": "Performs a number of useful functions related to modding Star Ruler 2.",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"publisher": "open-star-ruler",
 	"license": "MIT",
 	"engines": {
@@ -36,11 +36,23 @@
 			},
 			{
 				"command": "opensr-file-cloning.compareBaseFile",
-				"title": "OpenSR Toolset: Compare Base File"
+				"title": "OpenSR Toolset: Compare to Base File"
 			},
 			{
 				"command": "opensr-file-cloning.compareModFile",
-				"title": "OpenSR Toolset: Compare Mod File"
+				"title": "OpenSR Toolset: Compare to Mod File"
+			},
+			{
+				"command": "opensr-file-cloning.reregisterMod",
+				"title": "OpenSR Toolset: Reregister Mod"
+			},
+			{
+				"command": "opensr-file-cloning.cloneAncestorFile",
+				"title": "OpenSR Toolset: Clone Ancestor File"
+			},
+			{
+				"command": "opensr-file-cloning.compareAncestorFile",
+				"title": "OpenSR Toolset: Compare to Ancestor File"
 			}
 		],
 		"configuration": {

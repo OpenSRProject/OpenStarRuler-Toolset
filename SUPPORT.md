@@ -1,0 +1,1 @@
+Visit the OpenSR Discord: https://discord.gg/sUJKJDc

@@ -27,7 +27,7 @@ export function buildBaseFileOperation(
 			return;
 		}
 		const gamePath = await getGamePath(purpose);
-		const file = await fileFinder(purpose, gamePath);
+		const file = await fileFinder(purpose, modinfo, gamePath);
 		if (!file) {
 			LOGGER.info('baseFileOperation: Source file not found, aborting...');
 			return;
@@ -54,6 +54,7 @@ export function buildAncestorFileOperation(
 		}
 		const file = await fileFinder(
 			purpose,
+			modinfo,
 			await queryModinfo(modinfo.modPath, 'Derives From'),
 		);
 		if (!file) {
@@ -81,7 +82,7 @@ export function buildModFileOperation(
 			LOGGER.info('modFileOperation: No source mod selected, aborting...');
 			return;
 		}
-		const file = await fileFinder(purpose, sourceMod);
+		const file = await fileFinder(purpose, destinationMod, sourceMod);
 		if (!file) {
 			LOGGER.info('modFileOperation: Source file not found, aborting...');
 			return;

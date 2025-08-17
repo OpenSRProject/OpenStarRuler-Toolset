@@ -39,6 +39,10 @@ export function resolvePath(file: ModFile) {
 	return `${file.modPath}/${file.path || MODINFO}`;
 }
 
+export function unresolvePath(file: ModInfo, path: string) {
+	return path.replace(file.modPath, '');
+}
+
 export type StringOptional = string | undefined;
 export type ModinfoField = 'Derives From' | 'Name';
 export type FileFindable = StringOptional | ModInfo;
@@ -50,6 +54,7 @@ export type FileOperation = (
 
 export type FileFinder<T extends FileFindable> = (
 	purpose: string,
+	destinationMod: ModInfo,
 	modinfo: T,
 	usePath?: string,
 	isInternal?: boolean,

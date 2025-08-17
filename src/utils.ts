@@ -14,6 +14,7 @@ import {
 	ModInfo,
 	ModinfoField,
 	resolvePath,
+	unresolvePath,
 } from './types';
 
 const { getConfiguration, workspaceFolders } = workspace;
@@ -108,16 +109,18 @@ export async function getDestinationMod(
 	let modinfos = await findModinfos(workspaceFolders[0].uri.fsPath);
 	if (fromCurrentFile) {
 		const currentFile = window.activeTextEditor?.document.fileName;
-		LOGGER.info(
-			`getDestinationMod: Requesting modinfo for current file ${currentFile}...`,
-		);
-		modinfos = modinfos.filter(({ modPath }) => {
-			const isRightMod = currentFile?.includes(modPath);
-			LOGGER.debug(
-				`getDestinationMod: ${modPath} leads to current file: ${isRightMod}`,
+		if (currentFile) {
+			LOGGER.info(
+				`getDestinationMod: Requesting modinfo for current file ${currentFile}...`,
 			);
-			return isRightMod;
-		});
+			modinfos = modinfos.filter(({ modPath }) => {
+				const isRightMod = currentFile?.includes(modPath);
+				LOGGER.debug(
+					`getDestinationMod: ${modPath} leads to current file: ${isRightMod}`,
+				);
+				return isRightMod;
+			});
+		}
 	}
 
 	if (modinfos.length === 1) {
@@ -217,6 +220,7 @@ export async function requestFilePath(
 
 export async function findBaseFile(
 	purpose: string,
+	destinationMod: ModInfo,
 	gamePath?: string,
 	usePath?: string,
 	isInternal?: boolean,
@@ -249,7 +253,7 @@ export async function findBaseFile(
 				'The specified file does not exist! Are you sure you specified the right path?',
 				{ modal: true },
 			);
-			return await findBaseFile(purpose, gamePath, usePath);
+			return await findBaseFile(purpose, destinationMod, gamePath, usePath);
 		}
 	}
 	return file;
@@ -304,6 +308,7 @@ export async function pickMod(
 
 export async function findAncestorFile(
 	purpose: string,
+	destinationMod: ModInfo,
 	modName?: string,
 	usePath?: string,
 	isInternal = false,
@@ -314,6 +319,7 @@ export async function findAncestorFile(
 		);
 		return await findBaseFile(
 			purpose,
+			destinationMod,
 			await getGamePath(purpose, isInternal),
 			usePath,
 			isInternal,
@@ -326,6 +332,7 @@ export async function findAncestorFile(
 		);
 		return await findBaseFile(
 			purpose,
+			destinationMod,
 			await getGamePath(purpose, isInternal),
 			usePath,
 			isInternal,
@@ -341,6 +348,7 @@ export async function findAncestorFile(
 		const ancestorName = await queryModinfo(modPath, 'Derives From');
 		const ancestorFile = await findAncestorFile(
 			purpose,
+			destinationMod,
 			ancestorName,
 			path,
 			true,
@@ -359,7 +367,12 @@ export async function findAncestorFile(
 					'The specified file does not exist! Are you sure you specified the right path?',
 					{ modal: true },
 				);
-				return await findAncestorFile(purpose, modName, usePath);
+				return await findAncestorFile(
+					purpose,
+					destinationMod,
+					modName,
+					usePath,
+				);
 			}
 		}
 		return ancestorFile;
@@ -369,6 +382,7 @@ export async function findAncestorFile(
 
 export async function findModFile(
 	purpose: string,
+	destinationMod: ModInfo,
 	modinfo: ModInfo,
 	usePath?: string,
 	isInternal = false,
@@ -383,6 +397,7 @@ export async function findModFile(
 		const ancestorName = await queryModinfo(modinfo.modPath, 'Derives From');
 		const ancestorFile = await findAncestorFile(
 			purpose,
+			destinationMod,
 			ancestorName,
 			path,
 			true,
@@ -401,7 +416,7 @@ export async function findModFile(
 					'The specified file does not exist! Are you sure you specified the right path?',
 					{ modal: true },
 				);
-				return await findModFile(purpose, modinfo, usePath);
+				return await findModFile(purpose, destinationMod, modinfo, usePath);
 			}
 		}
 		return ancestorFile;
@@ -412,18 +427,28 @@ export async function findModFile(
 export function findForCurrentFile<T extends FileFindable>(
 	fileFinder: FileFinder<T>,
 ) {
-	return async (purpose: string, source: T): Promise<ModFile | undefined> => {
+	return async (
+		purpose: string,
+		currentMod: ModInfo,
+		source: T,
+	): Promise<ModFile | undefined> => {
 		const path = window.activeTextEditor?.document.fileName;
 		if (!path) {
 			LOGGER.info(`findforCurrentFile: No files open!`);
 			await showErrorMessage(
-				"You don't have any files open, what do you expect?",
+				"You don't have any files open, what do you expect from an operation against the current file?",
 				{ modal: true },
 			);
 			return;
 		}
 
-		const file = await fileFinder(purpose, source, path, true);
+		const file = await fileFinder(
+			purpose,
+			currentMod,
+			source,
+			unresolvePath(currentMod, path),
+			true,
+		);
 		if (!file) {
 			LOGGER.info(
 				`findCurrentFile: ${fileFinder.name} could not find file ${path}. Aborting...`,

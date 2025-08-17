@@ -30,3 +30,7 @@ Second alpha build. Extensive refactoring, and added the ability to compare file
 - More refactoring: The extension was getting a little bloated and hard to navigate, so I broke it up into separate files.
 - Added logging under `Output -> OpenSR Toolset`. This is subject to VSCode's log level, configurable via `Developer: Set Log Level...`.
 - Added a custom editor title for compare operations, denoting the source and destination mods for the comparison. (The base game is labeled `Base`).
+
+## 0.4.0
+
+- Added a new command family: `Compare Current File to...`. This is a variant of the compare command that tries to compare the currently active file to its counterpart in the requested mod.

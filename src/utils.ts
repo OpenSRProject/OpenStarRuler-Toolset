@@ -1,7 +1,7 @@
 import { workspace, commands, window }  from 'vscode';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join as joinPath } from 'node:path';
-import { COMMANDS, CONFIGS, LOGGER, ModFile, ModInfo, MODINFO, ModinfoField, resolvePath } from './types';
+import { COMMANDS, CONFIGS, FileFindable, FileFinder, LOGGER, ModFile, ModInfo, MODINFO, ModinfoField, resolvePath } from './types';
 import { Stats } from 'node:fs';
 
 const { getConfiguration, workspaceFolders } = workspace;
@@ -72,8 +72,18 @@ export async function pickModinfo(modinfos: ModInfo[], title: string): Promise<M
 	return modinfo && { modName: modinfo.label, modPath: modinfo.description };
 }
 
-export async function getDestinationMod(): Promise<ModInfo | undefined> {
-	const modinfos = await findModinfos(workspaceFolders![0].uri.fsPath);
+export async function getDestinationMod(fromCurrentFile: boolean): Promise<ModInfo | undefined> {
+	let modinfos = await findModinfos(workspaceFolders![0].uri.fsPath);
+	if(fromCurrentFile) {
+		const currentFile = window.activeTextEditor?.document.fileName;
+		LOGGER.info(`getDestinationMod: Requesting modinfo for current file ${currentFile}...`);
+		modinfos = modinfos.filter(({modPath}) => {
+			const isRightMod = currentFile?.includes(modPath)
+			LOGGER.debug(`getDestinationMod: ${modPath} leads to current file: ${isRightMod}`);
+			return isRightMod;
+		});
+	}
+
 	if(modinfos.length === 1) {
 		LOGGER.info(`getDestinationMod: Only one mod in workspace, defaulting to "${modinfos[0].modName}" at "${modinfos[0].modPath}"`);
 		return modinfos[0];
@@ -236,8 +246,8 @@ export async function findAncestorFile(purpose: string, modName?: string, usePat
     return file;
 }
 
-export async function findModFile(purpose: string, modinfo: ModInfo, usePath?: string): Promise<ModFile | undefined> {
-	const path = await requestFilePath(purpose, usePath);
+export async function findModFile(purpose: string, modinfo: ModInfo, usePath?: string, isInternal = false): Promise<ModFile | undefined> {
+	const path = await requestFilePath(purpose, usePath, isInternal);
 	if(!path) {
 		LOGGER.info("findModFile: No file path provided, aborting...");
 		return;
@@ -247,11 +257,35 @@ export async function findModFile(purpose: string, modinfo: ModInfo, usePath?: s
         const ancestorName = await queryModinfo(modinfo.modPath, "Derives From");
         const ancestorFile = await findAncestorFile(purpose, ancestorName, path, true);
 		if(!ancestorFile) {
-			LOGGER.info(`findModFile: File "${path}" does not exist in "${modinfo.modName}" or its ancestors. Retrying...`);
-			await showErrorMessage("The specified file does not exist! Are you sure you specified the right path?", { modal: true });
-			return await findModFile(purpose, modinfo, usePath);
+			if(isInternal) {
+				LOGGER.info(`findModFile: File "${path}" does not exist in "${modinfo.modName}" or its ancestors, but isInternal is set. Aborting...`);
+				return;
+			} else {
+				LOGGER.info(`findModFile: File "${path}" does not exist in "${modinfo.modName}" or its ancestors. Retrying...`);
+				await showErrorMessage("The specified file does not exist! Are you sure you specified the right path?", { modal: true });
+				return await findModFile(purpose, modinfo, usePath);
+			}
 		}
 		return ancestorFile;
 	}
 	return file;
+}
+
+export function findForCurrentFile<T extends FileFindable>(fileFinder: FileFinder<T>) {
+	return async (purpose: string, source: T): Promise<ModFile | undefined> => {
+		const path = window.activeTextEditor?.document.fileName;
+		if(!path) {
+			LOGGER.info(`findforCurrentFile: No files open!`);
+			await showErrorMessage("You don't have any files open, what do you expect?", { modal: true });
+			return;
+		}
+
+		const file = await fileFinder(purpose, source, path, true);
+		if(!file) {
+			LOGGER.info(`findCurrentFile: ${fileFinder.name} could not find file ${path}. Aborting...`);
+			await showErrorMessage("The current file does not exist in the requested mod or its ancestors. Try a different mod?", { modal: true });
+			return;
+		}
+		return file;
+	}
 }

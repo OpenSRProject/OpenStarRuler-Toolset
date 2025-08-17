@@ -13,6 +13,7 @@ Performs a number of useful functions related to modding Star Ruler 2.
     - The diff is editable, like the "Working Copy" diffs provided by VSCode's Git support.
     - Green was added by the currently active mod.
     - Red was removed by (or never existed in) the currently active mod.
+    - As of 0.4.0, has the ability to compare the currently active file without having to input a file path, via the "Compare Current File to..." command family.
     
 ## Requirements
 

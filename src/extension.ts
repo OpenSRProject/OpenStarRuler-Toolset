@@ -50,6 +50,12 @@ export function activate(context: ExtensionContext) {
 
 	const compareAncestorFile = registerCommand(COMMANDS.COMPARE_ANCESTOR_FILE, buildAncestorFileOperation("compare", diffFile));
 
+	const compareToBase = registerCommand(COMMANDS.COMPARE_TO_BASE, buildBaseFileOperation("compare", diffFile, true));
+
+	const compareToMod = registerCommand(COMMANDS.COMPARE_TO_MOD, buildModFileOperation("compare", diffFile, true));
+
+	const compareToAncestor = registerCommand(COMMANDS.COMPARE_TO_ANCESTOR, buildAncestorFileOperation("compare", diffFile, true));
+
 	subscriptions.push(findBaseFiles);
 	subscriptions.push(reregisterModCommand);
 	subscriptions.push(registerModCommand);
@@ -59,6 +65,9 @@ export function activate(context: ExtensionContext) {
 	subscriptions.push(compareBaseFile);
 	subscriptions.push(compareModFile);
 	subscriptions.push(compareAncestorFile);
+	subscriptions.push(compareToBase);
+	subscriptions.push(compareToMod);
+	subscriptions.push(compareToAncestor);
 }
 
 export function deactivate() {}

@@ -2,7 +2,7 @@
 	"name": "opensr-file-cloning",
 	"displayName": "OpenSR Toolset",
 	"description": "Performs a number of useful functions related to modding Star Ruler 2.",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"publisher": "open-star-ruler",
 	"license": "MIT",
 	"engines": {
@@ -11,7 +11,10 @@
 	"categories": [
 		"Other"
 	],
-	"repository": {"type": "git", "url": "https://github.com/OpenSRProject/OpenStarRuler-FileCloner"},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/OpenSRProject/OpenStarRuler-FileCloner"
+	},
 	"activationEvents": [
 		"workspaceContains:**/modinfo.txt"
 	],
@@ -53,6 +56,18 @@
 			{
 				"command": "opensr-file-cloning.compareAncestorFile",
 				"title": "OpenSR Toolset: Compare to Ancestor File"
+			},
+			{
+				"command": "opensr-file-cloning.compareToBase",
+				"title": "OpenSR Toolset: Compare Current File to Base"
+			},
+			{
+				"command": "opensr-file-cloning.compareToMod",
+				"title": "OpenSR Toolset: Compare Current File to Mod"
+			},
+			{
+				"command": "opensr-file-cloning.compareToAncestor",
+				"title": "OpenSR Toolset: Compare Current File to Ancestor"
 			}
 		],
 		"configuration": {
@@ -115,5 +130,7 @@
 		"typescript": "^4.6.4",
 		"vsce": "^2.9.1"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"eslint-config-prettier": "^10.1.8"
+	}
 }

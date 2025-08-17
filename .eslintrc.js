@@ -14,7 +14,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { vars: 'local' }],
-    '@typescript-eslint/indent': ['error', 2],
+    '@typescript-eslint/indent': ['error', 4],
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/member-delimiter-style': [
       'error',

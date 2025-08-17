@@ -1,11 +1,11 @@
-import { window } from "vscode";
+import { window } from 'vscode';
 
-export const PREFIX = "opensr-file-cloning";
+export const PREFIX = 'opensr-file-cloning';
 
 export enum CONFIGS {
     BASE_GAME_FOLDER = `${PREFIX}.baseGameFolder`,
     REGISTERED_MODS = `${PREFIX}.registeredMods`,
-};
+}
 
 export enum COMMANDS {
     FIND_BASE_FILES = `${PREFIX}.findBaseFiles`,
@@ -20,10 +20,12 @@ export enum COMMANDS {
     COMPARE_TO_BASE = `${PREFIX}.compareToBase`,
     COMPARE_TO_MOD = `${PREFIX}.compareToMod`,
     COMPARE_TO_ANCESTOR = `${PREFIX}.compareToAncestor`,
-};
+}
 
-export const LOGGER = window.createOutputChannel("OpenSR Toolset", { log: true });
-export const MODINFO = "modinfo.txt";
+export const LOGGER = window.createOutputChannel('OpenSR Toolset', {
+    log: true,
+});
+export const MODINFO = 'modinfo.txt';
 
 export interface ModFile {
     modPath: string;
@@ -36,7 +38,15 @@ export function resolvePath(file: ModFile) {
 }
 
 export type StringOptional = string | undefined;
-export type ModinfoField = "Derives From" | "Name";
+export type ModinfoField = 'Derives From' | 'Name';
 export type FileFindable = StringOptional | ModInfo;
-export type FileOperation = (source: ModFile, destination: ModFile) => Promise<void>;
-export type FileFinder<T extends FileFindable> = (purpose: string, modinfo: T, usePath?: string, isInternal?: boolean) => Promise<ModFile | undefined>
+export type FileOperation = (
+    source: ModFile,
+    destination: ModFile,
+) => Promise<void>;
+export type FileFinder<T extends FileFindable> = (
+    purpose: string,
+    modinfo: T,
+    usePath?: string,
+    isInternal?: boolean,
+) => Promise<ModFile | undefined>;

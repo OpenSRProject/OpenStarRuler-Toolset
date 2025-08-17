@@ -2,7 +2,7 @@
 	"name": "opensr-toolset",
 	"displayName": "OpenSR Toolset",
 	"description": "Performs a number of useful functions related to modding Star Ruler 2.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "OpenStarRuler",
 	"license": "MIT",
 	"engines": {

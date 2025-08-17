@@ -272,7 +272,7 @@ export async function pickMod(
 			? { modName, modPath: registeredMods[modName] }
 			: undefined;
 	}
-	if (!registeredMods?.length) {
+	if (!entries(registeredMods)?.length) {
 		LOGGER.info(
 			`pickMod: No registered mods, prompting user to register one...`,
 		);

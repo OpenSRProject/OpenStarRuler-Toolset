@@ -41,3 +41,7 @@ Second alpha build. Extensive refactoring, and added the ability to compare file
 - Added install scripts for localdev QoL. The batch/shell scripts will rebuild the extension, then tell VSCode to install it from the freshly-baked VSIX.
 - **BREAKING**: Changed extension name from `opensr-file-cloning` to the more appropriate `opensr-toolset`.
     - If you've previously used the old extension, you will need to rename all your settings to use the `opensr-toolset` prefix. Sorry about that, shouldn't happen again.
+
+### 1.0.1
+
+- Fixed an issue where all operations requiring the user to pick a registered mod (anything with `Mod` except `Register Mod`) failed because they thought no mods were registered yet.

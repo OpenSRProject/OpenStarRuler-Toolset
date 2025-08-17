@@ -1,6 +1,6 @@
 import { window } from 'vscode';
 
-export const PREFIX = 'opensr-file-cloning';
+export const PREFIX = 'OpenSRToolset';
 
 export const CONFIGS = {
 	BASE_GAME_FOLDER: `${PREFIX}.baseGameFolder`,

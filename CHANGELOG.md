@@ -34,3 +34,10 @@ Second alpha build. Extensive refactoring, and added the ability to compare file
 ## 0.4.0
 
 - Added a new command family: `Compare Current File to...`. This is a variant of the compare command that tries to compare the currently active file to its counterpart in the requested mod.
+
+# 1.0.0
+
+- Finally got around to figuring out how to publish to VSCode Marketplace.
+- Added install scripts for localdev QoL. The batch/shell scripts will rebuild the extension, then tell VSCode to install it from the freshly-baked VSIX.
+- **BREAKING**: Changed extension name from `opensr-file-cloning` to the more appropriate `OpenSRToolset`.
+    - If you've previously used the old extension, you will need to rename all your settings to use the `OpenSRToolset` prefix. Sorry about that, shouldn't happen again.

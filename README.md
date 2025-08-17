@@ -2,9 +2,15 @@
 
 Performs a number of useful functions related to modding Star Ruler 2.
 
+## How to Install
+
+If you're looking for the latest published version, go to the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=OpenStarRuler.OpenSRToolset) and install it there.
+
+If you can't install it from the Marketplace for some reason, or you want to build and install from source, a couple of helper scripts have been provided in the [GitHub repo](https://github.com/OpenSRProject/OpenStarRuler-Toolset) that should do the trick. Simply run `install.bat` (Windows) or `install.sh` (Linux/MacOS) and let it take care of the rest!
+
 ## Features
 
-* Cloning files from another mod
+- Cloning files from another mod
     - Base game
     - Ancestor mods (if any), with fallback to base game
     - Other mods and their ancestors
@@ -17,13 +23,19 @@ Performs a number of useful functions related to modding Star Ruler 2.
     
 ## Requirements
 
-N/A
+If installing from the Marketplace: Arguably a copy of Star Ruler 2. The extension will work without it, but won't be able to fall back to vanilla files, and will make this known by prompting you to find them every time it becomes relevant.
+
+If installing from source: As above, plus:
+- Yarn 1 (VSCE claims Yarn 2 is unsupported)
+- Node 20+
+- VSCode (you'll have nothing to install *to* without that!)
+    - The install script expects VSCode to be accessible from the command line via `code`. 
 
 ## Extension Settings
 
-* `opensr-file-cloning.baseGameFolder`: string
+- `OpenSRToolset.baseGameFolder`: string
     - Path to Star Ruler 2 installation folder.
-* `opensr-file-cloning.registeredMods`: dictionary (JSON object)
+- `OpenSRToolset.registeredMods`: dictionary (JSON object)
     - Maps mod names from the UI to the paths of their respective mod folders.
 
 ## Known Issues

@@ -1,0 +1,1 @@
+yarn && yarn vscode:pack && node install

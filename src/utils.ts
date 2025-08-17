@@ -97,7 +97,16 @@ export async function pickModinfo(
 export async function getDestinationMod(
     fromCurrentFile: boolean,
 ): Promise<ModInfo | undefined> {
-    let modinfos = await findModinfos(workspaceFolders![0].uri.fsPath);
+    if (!workspaceFolders) {
+        LOGGER.info('getDestinationMod: No folders in workspace, aborting...');
+        await showErrorMessage(
+            'You must open a folder to execute this command!',
+            { modal: true },
+        );
+        return;
+    }
+
+    let modinfos = await findModinfos(workspaceFolders[0].uri.fsPath);
     if (fromCurrentFile) {
         const currentFile = window.activeTextEditor?.document.fileName;
         LOGGER.info(

@@ -1,5 +1,5 @@
 {
-	"name": "OpenSRToolset",
+	"name": "opensr-toolset",
 	"displayName": "OpenSR Toolset",
 	"description": "Performs a number of useful functions related to modding Star Ruler 2.",
 	"version": "1.0.0",
@@ -22,51 +22,51 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "OpenSRToolset.findBaseFiles",
+				"command": "opensr-toolset.findBaseFiles",
 				"title": "OpenSR Toolset: Find Base Files"
 			},
 			{
-				"command": "OpenSRToolset.registerMod",
+				"command": "opensr-toolset.registerMod",
 				"title": "OpenSR Toolset: Register Mod"
 			},
 			{
-				"command": "OpenSRToolset.cloneBaseFile",
+				"command": "opensr-toolset.cloneBaseFile",
 				"title": "OpenSR Toolset: Clone Base File"
 			},
 			{
-				"command": "OpenSRToolset.cloneModFile",
+				"command": "opensr-toolset.cloneModFile",
 				"title": "OpenSR Toolset: Clone Mod File"
 			},
 			{
-				"command": "OpenSRToolset.compareBaseFile",
+				"command": "opensr-toolset.compareBaseFile",
 				"title": "OpenSR Toolset: Compare to Base File"
 			},
 			{
-				"command": "OpenSRToolset.compareModFile",
+				"command": "opensr-toolset.compareModFile",
 				"title": "OpenSR Toolset: Compare to Mod File"
 			},
 			{
-				"command": "OpenSRToolset.reregisterMod",
+				"command": "opensr-toolset.reregisterMod",
 				"title": "OpenSR Toolset: Reregister Mod"
 			},
 			{
-				"command": "OpenSRToolset.cloneAncestorFile",
+				"command": "opensr-toolset.cloneAncestorFile",
 				"title": "OpenSR Toolset: Clone Ancestor File"
 			},
 			{
-				"command": "OpenSRToolset.compareAncestorFile",
+				"command": "opensr-toolset.compareAncestorFile",
 				"title": "OpenSR Toolset: Compare to Ancestor File"
 			},
 			{
-				"command": "OpenSRToolset.compareToBase",
+				"command": "opensr-toolset.compareToBase",
 				"title": "OpenSR Toolset: Compare Current File to Base"
 			},
 			{
-				"command": "OpenSRToolset.compareToMod",
+				"command": "opensr-toolset.compareToMod",
 				"title": "OpenSR Toolset: Compare Current File to Mod"
 			},
 			{
-				"command": "OpenSRToolset.compareToAncestor",
+				"command": "opensr-toolset.compareToAncestor",
 				"title": "OpenSR Toolset: Compare Current File to Ancestor"
 			}
 		],
@@ -74,13 +74,13 @@
 			"type": "object",
 			"title": "OpenSR Toolset",
 			"properties": {
-				"OpenSRToolset.baseGameFolder": {
+				"opensr-toolset.baseGameFolder": {
 					"type": "string",
 					"default": "",
 					"description": "Path to Star Ruler 2 installation folder.",
 					"title": "Base Game Folder"
 				},
-				"OpenSRToolset.registeredMods": {
+				"opensr-toolset.registeredMods": {
 					"type": "object",
 					"default": {},
 					"title": "Registered Mods",

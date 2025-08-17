@@ -4,7 +4,7 @@ Performs a number of useful functions related to modding Star Ruler 2.
 
 ## How to Install
 
-If you're looking for the latest published version, go to the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=OpenStarRuler.OpenSRToolset) and install it there.
+If you're looking for the latest published version, go to the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=OpenStarRuler.opensr-toolset) and install it there.
 
 If you can't install it from the Marketplace for some reason, or you want to build and install from source, a couple of helper scripts have been provided in the [GitHub repo](https://github.com/OpenSRProject/OpenStarRuler-Toolset) that should do the trick. Simply run `install.bat` (Windows) or `install.sh` (Linux/MacOS) and let it take care of the rest!
 
@@ -33,9 +33,9 @@ If installing from source: As above, plus:
 
 ## Extension Settings
 
-- `OpenSRToolset.baseGameFolder`: string
+- `opensr-toolset.baseGameFolder`: string
     - Path to Star Ruler 2 installation folder.
-- `OpenSRToolset.registeredMods`: dictionary (JSON object)
+- `opensr-toolset.registeredMods`: dictionary (JSON object)
     - Maps mod names from the UI to the paths of their respective mod folders.
 
 ## Known Issues
